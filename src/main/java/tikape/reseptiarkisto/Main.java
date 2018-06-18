@@ -31,8 +31,8 @@ public class Main {
         }
         
         // Haetaan Herokun tietokannan osoite ja tehdään Database-olio sillä osoitteella
-        /*String dbUrl = System.getenv("JDBC_DATABASE_URL");
-        Database db = new Database(dbUrl);*/
+        String dbUrl = System.getenv("JDBC_DATABASE_URL");
+        Database db = new Database(dbUrl);
         
         
         // Reseptilistauksen näyttö
@@ -47,7 +47,7 @@ public class Main {
         Spark.get("/raaka-aineet/", (req,res) -> {
             List<RaakaAine> raakaAineet = new ArrayList<>();
             
-            Connection conn = getConnection();//db.getConnection();
+            Connection conn = db.getConnection();
             
              // tee kysely
             PreparedStatement stmt
@@ -71,7 +71,7 @@ public class Main {
         
         // Raaka-aineen lisäys
         Spark.post("/raaka-aineet/", (req, res) -> {
-            Connection conn = getConnection();//db.getConnection();
+            Connection conn = db.getConnection();
             
             // tee kysely
             PreparedStatement stmt
@@ -88,14 +88,5 @@ public class Main {
             return "";
         });
         
-    }
-    
-        public static Connection getConnection() throws Exception {
-        String dbUrl = System.getenv("JDBC_DATABASE_URL");
-        if (dbUrl != null && dbUrl.length() > 0) {
-            return DriverManager.getConnection(dbUrl);
-        }
-
-        return DriverManager.getConnection("jdbc:sqlite:huonekalut.db");
     }
 }
