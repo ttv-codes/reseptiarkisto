@@ -12,6 +12,9 @@
         <ul>
             <li th:each="raakaAine : ${raakaAineet}">
                 <span th:text="${raakaAine.nimi}">resepti</span>
+                <form method="POST" th:action="@{~/raaka-aineet/{raakaAineId}/delete(raakaAineId=${raakaAine.id})}">
+                    <input type="submit" value="Poista"/>
+                </form>
             </li>
         </ul>
         

@@ -59,10 +59,6 @@ public class Main {
                 String nimi = tulos.getString("nimi");
                 Integer id = tulos.getInt("id");
                 raakaAineet.add(new RaakaAine(id,nimi));
-                System.out.println("-------------------------");
-                System.out.println("Listattiin:");
-                System.out.println("id: "+id);
-                System.out.println("nimi "+nimi);
             }
             // sulje yhteys tietokantaan
             conn.close();
@@ -89,6 +85,26 @@ public class Main {
             // sulje yhteys tietokantaan
             conn.close();
 
+            res.redirect("/raaka-aineet/");
+            
+            return "";
+        });
+        
+        // Raaka-aineen poisto
+        Spark.post("/raaka-aineet/:raakaAineId/delete", (req, res) -> {
+            // avaa yhteys tietokantaan
+            Connection conn = db.getConnection();
+            
+            // tee kysely
+            PreparedStatement stmt
+                    = conn.prepareStatement("DELETE FROM RaakaAine WHERE id = ?");
+            stmt.setInt(1, Integer.parseInt(req.params(":huonekaluId")));
+            
+            stmt.executeUpdate();
+            
+            // sulje yhteys tietokantaan
+            conn.close();
+            
             res.redirect("/raaka-aineet/");
             
             return "";
