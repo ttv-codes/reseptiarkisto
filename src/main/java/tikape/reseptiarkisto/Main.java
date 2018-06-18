@@ -5,10 +5,13 @@
  */
 package tikape.reseptiarkisto;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.HashMap;
 import spark.ModelAndView;
 import spark.Spark;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
+import tikape.database.Database;
 
 /**
  *
@@ -21,6 +24,10 @@ public class Main {
         if (System.getenv("PORT") != null) {
             Spark.port(Integer.valueOf(System.getenv("PORT")));
         }
+        
+        // Haetaan Herokun tietokannan osoite ja tehdään Database-olio sillä osoitteella
+        String dbUrl = System.getenv("JDBC_DATABASE_URL");
+        Database db = new Database(dbUrl);
         
         Spark.get("/", (req,res) -> {
             HashMap map = new HashMap<>();
