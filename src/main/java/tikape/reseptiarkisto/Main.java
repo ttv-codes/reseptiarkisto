@@ -65,6 +65,8 @@ public class Main {
             
             HashMap map = new HashMap<>();
             
+            map.put("raakaAineet", raakaAineet);
+            
             return new ModelAndView(map, "raaka-aineet");
         }, new ThymeleafTemplateEngine());
         
@@ -76,7 +78,7 @@ public class Main {
             // tee kysely
             PreparedStatement stmt
                     = conn.prepareStatement("INSERT INTO RaakaAine (nimi) VALUES (?)");
-            stmt.setString(1, req.queryParams("raakaAine"));
+            stmt.setString(1, req.queryParams("aine"));
 
             stmt.executeUpdate();
 
