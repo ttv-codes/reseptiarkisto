@@ -15,7 +15,17 @@
             sekä erityisohjeet raaka-aineiden käytöstä. Arkistoon voi lisätä uusia reseptejä
             ja raaka-aineita etusivun alareunassa olevien linkkien kautta.
         </p>
+        
         <h2>Reseptit</h2>
+        
+        <ul>
+            <li th:each="resepti : ${reseptit}">
+                <a th:href="@{~/reseptit/{id}(id=${resepti.id})}">
+                    <span th:text="${resepti.nimi}">resepti</span>
+                </a>
+            </li>
+        </ul>
+        
     </body>
     
 </html>
