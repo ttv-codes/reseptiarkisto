@@ -59,6 +59,10 @@ public class Main {
                 String nimi = tulos.getString("nimi");
                 Integer id = tulos.getInt("id");
                 raakaAineet.add(new RaakaAine(id,nimi));
+                System.out.println("-------------------------");
+                System.out.println("Listattiin:");
+                System.out.println("id: "+id);
+                System.out.println("nimi "+nimi);
             }
             // sulje yhteys tietokantaan
             conn.close();
