@@ -35,5 +35,11 @@ public class Main {
             return new ModelAndView(map, "index");
         }, new ThymeleafTemplateEngine());
         
+        Spark.get("/raaka-aineet/", (req,res) -> {
+            HashMap map = new HashMap<>();
+            
+            return new ModelAndView(map, "raaka-aineet");
+        }, new ThymeleafTemplateEngine());
+        
     }
 }
