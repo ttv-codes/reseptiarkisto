@@ -7,7 +7,7 @@
     </head>
     
     <body>
-        <h1>Reseptiarkisto</h1>
+        <h2>Reseptiarkisto</h2>
         <p>
             Tervetuloa reseptiarkistoon! "Reseptit"-otsakkeen alta löytyvät tällä 
             hetkellä arkistosta löytyvät ruoka- ja juomareseptit listattuna. Resepteistä
@@ -16,7 +16,7 @@
             ja raaka-aineita etusivun alareunassa olevien linkkien kautta.
         </p>
         
-        <h2>Reseptit</h2>
+        <h4>Reseptit</h4>
         
         <ul>
             <li th:each="resepti : ${reseptit}">
@@ -26,9 +26,14 @@
             </li>
         </ul>
         
+        <h4>Reseptien ja raaka-aineiden lisäys:</h4>
+        
         <ul>
             <li>
-                <a href="raaka-aineet/">Lisää tai poista raaka-aineita</a>
+                <a href="reseptit/uusi/">Lisää uusi resepti</a>
+            </li>
+            <li>
+                <a href="raaka-aineet/">Lisää, poista ja tarkastele raaka-aineita</a>
             </li>
         </ul>
         

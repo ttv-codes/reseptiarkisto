@@ -17,6 +17,7 @@ import spark.Spark;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
 import tikape.database.Database;
 import tikape.domain.RaakaAine;
+import tikape.domain.Resepti;
 
 /**
  *
@@ -37,7 +38,25 @@ public class Main {
         
         // Reseptilistauksen näyttö
         Spark.get("/", (req,res) -> {
+            List<Resepti> reseptit = new ArrayList<>();
+            
+            Connection conn = db.getConnection();
+            
+            PreparedStatement stmt
+                    = conn.prepareStatement("SELECT id, nimi FROM Resepti");
+            ResultSet rs = stmt.executeQuery();
+            
+            while(rs.next()) {
+                Integer id = rs.getInt("id");
+                String nimi = rs.getString("nimi");
+                reseptit.add(new Resepti(id,nimi));
+            }
+            
+            conn.close();
+            
             HashMap map = new HashMap<>();
+            
+            map.put("reseptit",reseptit);
 
             return new ModelAndView(map, "index");
         }, new ThymeleafTemplateEngine());
@@ -91,14 +110,14 @@ public class Main {
         });
         
         // Raaka-aineen poisto
-        Spark.post("/raaka-aineet/:raakaAineId/delete", (req, res) -> {
+        Spark.get("/raaka-aineet/:raakaAineId/delete", (req, res) -> {
             // avaa yhteys tietokantaan
             Connection conn = db.getConnection();
             
             // tee kysely
             PreparedStatement stmt
                     = conn.prepareStatement("DELETE FROM RaakaAine WHERE id = ?");
-            stmt.setInt(1, Integer.parseInt(req.params(":huonekaluId")));
+            stmt.setInt(1, Integer.parseInt(req.params(":raakaAineId")));
             
             stmt.executeUpdate();
             

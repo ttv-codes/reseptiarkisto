@@ -7,14 +7,12 @@
     </head>
     
     <body>
-        <h1>Raaka-aine listaus</h1>
+        <h2>Raaka-aineiden listaus</h2>
         
         <ul>
             <li th:each="raakaAine : ${raakaAineet}">
                 <span th:text="${raakaAine.nimi}">resepti</span>
-                <form method="POST" th:action="@{~/raaka-aineet/{raakaAineId}/delete(raakaAineId=${raakaAine.id})}">
-                    <input type="submit" value="Poista"/>
-                </form>
+                <a th:href="@{~/raaka-aineet/{raakaAineId}/delete (raakaAineId=${raakaAine.id})}">(poista)</a>
             </li>
         </ul>
         
