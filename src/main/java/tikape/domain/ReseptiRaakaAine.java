@@ -13,14 +13,16 @@ public class ReseptiRaakaAine {
     
     private Integer raakaAineId;
     private Integer reseptiId;
+    private String nimi;
     private Integer jarjestys;
     private String maara;
     private String ohje;
     
-    public ReseptiRaakaAine(Integer raakaAineId, Integer reseptiId, Integer jarjestys,
+    public ReseptiRaakaAine(Integer raakaAineId, Integer reseptiId, String raakaAine, Integer jarjestys,
                               String maara, String ohje) {
         this.raakaAineId = raakaAineId;
         this.reseptiId = reseptiId;
+        this.nimi = raakaAine;
         this.jarjestys = jarjestys;
         this.maara = maara;
         this.ohje = ohje;
@@ -34,15 +36,19 @@ public class ReseptiRaakaAine {
         return this.reseptiId;
     }
     
-    public Integer jarjestys() {
+    public String getNimi() {
+        return this.nimi;
+    }
+    
+    public Integer getJarjestys() {
         return this.jarjestys;
     }
     
-    public String maara() {
+    public String getMaara() {
         return this.maara;
     }
     
-    public String ohje() {
+    public String getOhje() {
         return this.ohje;
     }
 }

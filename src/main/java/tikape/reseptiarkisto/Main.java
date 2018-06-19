@@ -5,19 +5,20 @@
  */
 package tikape.reseptiarkisto;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import spark.ModelAndView;
 import spark.Spark;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
+import tikape.dao.RaakaAineDao;
+import tikape.dao.ReseptiDao;
+import tikape.dao.ReseptiRaakaAineDao;
 import tikape.database.Database;
 import tikape.domain.RaakaAine;
 import tikape.domain.Resepti;
+import tikape.domain.ReseptiRaakaAine;
 
 /**
  *
@@ -34,25 +35,14 @@ public class Main {
         // Haetaan Herokun tietokannan osoite ja tehdään Database-olio sillä osoitteella
         String dbUrl = System.getenv("JDBC_DATABASE_URL");
         Database db = new Database(dbUrl);
+        ReseptiDao reseptiDao = new ReseptiDao(db);
+        RaakaAineDao raakaAineDao = new RaakaAineDao(db);
+        ReseptiRaakaAineDao reseptiRaakaAineDao = new ReseptiRaakaAineDao(db);
         
         
-        // Reseptilistauksen näyttö
+        // Reseptilistauksen näyttö---------------------------------------------
         Spark.get("/", (req,res) -> {
-            List<Resepti> reseptit = new ArrayList<>();
-            
-            Connection conn = db.getConnection();
-            
-            PreparedStatement stmt
-                    = conn.prepareStatement("SELECT id, nimi FROM Resepti");
-            ResultSet rs = stmt.executeQuery();
-            
-            while(rs.next()) {
-                Integer id = rs.getInt("id");
-                String nimi = rs.getString("nimi");
-                reseptit.add(new Resepti(id,nimi));
-            }
-            
-            conn.close();
+            List<Resepti> reseptit = reseptiDao.findAll();
             
             HashMap map = new HashMap<>();
             
@@ -62,67 +52,133 @@ public class Main {
         }, new ThymeleafTemplateEngine());
         
         
-        // Raaka-ainelistauksen näyttö
-        Spark.get("/raaka-aineet/", (req,res) -> {
-            List<RaakaAine> raakaAineet = new ArrayList<>();
+        
+        // Reseptilisäyksen näyttö----------------------------------------------
+        Spark.get("/reseptit/uusi/", (req, res) -> {
+            List<Resepti> reseptit = reseptiDao.findAll();
+            List<RaakaAine> raakaAineet = raakaAineDao.findAll();
             
-            Connection conn = db.getConnection();
+            HashMap map = new HashMap<>();
             
-             // tee kysely
-            PreparedStatement stmt
-                    = conn.prepareStatement("SELECT id, nimi FROM RaakaAine");
-            ResultSet tulos = stmt.executeQuery();
+            map.put("reseptit",reseptit);
+            map.put("raakaAineet",raakaAineet);
 
-            // käsittele kyselyn tulokset
-            while (tulos.next()) {
-                String nimi = tulos.getString("nimi");
-                Integer id = tulos.getInt("id");
-                raakaAineet.add(new RaakaAine(id,nimi));
+            return new ModelAndView(map, "reseptit");
+        }, new ThymeleafTemplateEngine());
+        
+        
+        // Reseptin lisäys listaukseen------------------------------------------
+        Spark.post("/reseptit/uusi/lisaa-resepti/", (req, res) -> {
+            reseptiDao.save(new Resepti(-1, req.queryParams("resepti")));
+            
+            res.redirect("/reseptit/uusi/");
+            
+            return "";
+        });
+        
+        // Reseptin poisto------------------------------------------------------
+        Spark.get("/reseptit/:reseptiId/delete", (req, res) -> {
+            Integer id = Integer.parseInt(req.params(":reseptiId"));
+            reseptiRaakaAineDao.deleteByReseptiId(id);
+            reseptiDao.delete(id);
+            
+            res.redirect("/reseptit/uusi/");
+            
+            return "";
+        });
+        
+        // Raaka-aineiden lisäys reseptiin -------------------------------------
+        Spark.post("/reseptit/uusi/lisaa-raaka-aine/", (req, res) -> {
+            Integer raakaAineId = Integer.parseInt(req.queryParams("raakaAineId"));
+            System.out.println("tulostetaan" + raakaAineId);
+            Integer reseptiId = Integer.parseInt(req.queryParams("reseptiId"));
+            Integer jarjestys = Integer.parseInt(req.queryParams("jarjestys"));
+            String maara = req.queryParams("maara");
+            String ohje = req.queryParams("ohje");
+            
+            reseptiRaakaAineDao.save(new ReseptiRaakaAine(raakaAineId, reseptiId, "placeholder", jarjestys,
+                    maara, ohje));
+            
+            res.redirect("/reseptit/uusi/");
+            
+            return "";
+        });
+        
+        
+        // Reseptin näyttö------------------------------------------------------
+        Spark.get("reseptit/:id", (req, res) -> {
+            Resepti resepti = reseptiDao.findOne(Integer.parseInt(req.params(":id"))); 
+            
+            List<ReseptiRaakaAine> raakaAineet = reseptiRaakaAineDao.findRaakaAineet(resepti.getId());
+            
+            HashMap map = new HashMap<>();
+            map.put("resepti",resepti);
+            map.put("reseptinRaakaAineet", raakaAineet);
+
+            return new ModelAndView(map, "resepti");
+        }, new ThymeleafTemplateEngine());
+        
+        
+        // Raaka-ainelistauksen näyttö------------------------------------------
+        Spark.get("/raaka-aineet/", (req,res) -> {
+            List<RaakaAine> raakaAineet = raakaAineDao.findAll();
+            HashMap<RaakaAine, Integer> raakaAineetJaLukumaarat = new HashMap<>();
+            
+            Integer maxResepteja = 0;
+            Integer minResepteja = 10000;
+            
+            for(RaakaAine aine : raakaAineet) {
+                Integer resepteja = reseptiRaakaAineDao.montakoReseptia(aine.getId());
+                if (resepteja < minResepteja) {
+                    minResepteja = resepteja;
+                }
+                if (resepteja > maxResepteja) {
+                    maxResepteja = resepteja;
+                }
+                raakaAineetJaLukumaarat.put(aine,resepteja);
             }
-            // sulje yhteys tietokantaan
-            conn.close();
+            
+            List<RaakaAine> suosituimmat = new ArrayList<>();
+            List<RaakaAine> harvinaisimmat = new ArrayList<>();
+            
+            for(RaakaAine aine : raakaAineet) {
+                Integer resepteja = raakaAineetJaLukumaarat.get(aine);
+                if (resepteja.equals(maxResepteja)) {
+                    suosituimmat.add(aine);
+                }
+                if (resepteja.equals(minResepteja)) {
+                    harvinaisimmat.add(aine);
+                }
+            }
             
             HashMap map = new HashMap<>();
             
             map.put("raakaAineet", raakaAineet);
+            map.put("lukumaarat", raakaAineetJaLukumaarat);
+            map.put("suosituimmat", suosituimmat);
+            map.put("harvinaisimmat", harvinaisimmat);
+            map.put("suositutlkm", maxResepteja);
+            map.put("harvinaisetlkm", minResepteja);
             
             return new ModelAndView(map, "raaka-aineet");
         }, new ThymeleafTemplateEngine());
         
         
-        // Raaka-aineen lisäys
+        // Raaka-aineen lisäys--------------------------------------------------
         Spark.post("/raaka-aineet/", (req, res) -> {
-            Connection conn = db.getConnection();
-            
-            // tee kysely
-            PreparedStatement stmt
-                    = conn.prepareStatement("INSERT INTO RaakaAine (nimi) VALUES (?)");
-            stmt.setString(1, req.queryParams("aine"));
-
-            stmt.executeUpdate();
-
-            // sulje yhteys tietokantaan
-            conn.close();
+            raakaAineDao.save(new RaakaAine(-1,req.queryParams("aine")));
 
             res.redirect("/raaka-aineet/");
             
             return "";
         });
         
-        // Raaka-aineen poisto
+        // Raaka-aineen poisto--------------------------------------------------
         Spark.get("/raaka-aineet/:raakaAineId/delete", (req, res) -> {
-            // avaa yhteys tietokantaan
-            Connection conn = db.getConnection();
-            
-            // tee kysely
-            PreparedStatement stmt
-                    = conn.prepareStatement("DELETE FROM RaakaAine WHERE id = ?");
-            stmt.setInt(1, Integer.parseInt(req.params(":raakaAineId")));
-            
-            stmt.executeUpdate();
-            
-            // sulje yhteys tietokantaan
-            conn.close();
+            Integer id = Integer.parseInt(req.params(":raakaAineId"));
+            reseptiRaakaAineDao.deleteByRaakaAineId(id);
+            raakaAineDao.delete(id);
+
             
             res.redirect("/raaka-aineet/");
             

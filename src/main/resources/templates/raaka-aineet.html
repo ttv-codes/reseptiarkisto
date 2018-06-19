@@ -11,10 +11,16 @@
         
         <ul>
             <li th:each="raakaAine : ${raakaAineet}">
-                <span th:text="${raakaAine.nimi}">resepti</span>
+                <span th:text="${raakaAine.nimi + ' (reseptejä ' + lukumaarat.get(raakaAine) +')'}">resepti</span>
                 <a th:href="@{~/raaka-aineet/{raakaAineId}/delete (raakaAineId=${raakaAine.id})}">(poista)</a>
             </li>
         </ul>
+        
+        <h4 th:text="${'Yleisimmät raaka-aineet (reseptejä ' + suositutlkm + ')' }"></h4>
+        <p th:text="${suosituimmat}"></p>
+        
+        <h4 th:text="${'Harvinaisimmat raaka-aineet (reseptejä ' + harvinaisetlkm + ')' }"></h4>
+        <p th:text="${harvinaisimmat}"></p>
         
         <h4>Lisää uusi raaka-aine</h4>
         

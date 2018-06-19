@@ -1,0 +1,67 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    
+    <head>
+        <title>Reseptiarkisto</title>
+    </head>
+    
+    <body>
+        <h4>Reseptit</h4>
+        
+        <ul>
+            <li th:each="resepti : ${reseptit}">
+                <a th:href="@{~/reseptit/{id}(id=${resepti.id})}">
+                    <span th:text="${resepti.nimi}">resepti</span>
+                </a>
+                (<a th:href="@{~/reseptit/{reseptinId}/delete (reseptinId=${resepti.id})}">poista</a>)
+            </li>
+        </ul>
+        
+        <h4>Lisää uusi resepti</h4>
+        
+        <form method="POST" action="/reseptit/uusi/lisaa-resepti/">
+            Reseptin nimi:<br/>
+            <input type="text" name="resepti"/><br/>
+            <input type="submit" value="Lisää"/>
+        </form>
+        
+        <h4>Lisää raaka-aineita</h4>
+        
+        <form method="POST" action="/reseptit/uusi/lisaa-raaka-aine/">
+            Reseptin nimi:<br/>
+            <select name="reseptiId">
+                <option th:each="resepti : ${reseptit}"
+                        th:value="${resepti.id}"
+                        th:text="${resepti.nimi}">
+                    resepti
+                </option>
+            </select>
+            <br/>
+            Lisättävä raaka-aine<br/>
+            <select name="raakaAineId">
+                <option th:each="raakaAine : ${raakaAineet}"
+                        th:value="${raakaAine.id}"
+                        th:text="${raakaAine.nimi}">
+                    raaka-aine
+                </option>
+            </select>
+            <br/>
+            Järjestys (pakollinen, vain numeroarvo, pienin numero ensimmäisenä)<br/>
+            <input type="text" name="jarjestys"/><br/>
+            Määrä (pakollinen, lisää myös yksiköt)<br/>
+            <input type="text" name="maara"/><br/>
+            Ohje (valinnainen)<br/>
+            <input type="text" name="ohje"/><br/>
+            <input type="submit" value="Lisää"/>
+        </form>
+        
+        <ul>
+            <li>
+                <a href="/">Palaa etusivulle</a>
+            </li>
+        </ul>
+        
+    </body>
+    
+</html>
